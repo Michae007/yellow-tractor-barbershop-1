@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Жёлтый Трактор</string>
+    <string name="bookings_title">Записи клиентов</string>
+    <string name="loading">Загрузка...</string>
+    <string name="error_loading">Ошибка загрузки</string>
+    <string name="no_bookings">Записей нет</string>
+    <string name="pull_to_refresh">Потяните для обновления</string>
+</resources>
