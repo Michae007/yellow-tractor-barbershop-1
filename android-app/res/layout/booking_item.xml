@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp"
+    app:cardUseCompatPadding="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp"
+        android:background="?attr/selectableItemBackground">
+
+        <!-- Основная информация о клиенте -->
+        <TextView
+            android:id="@+id/textClientName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Имя ребенка (Возраст лет) - Услуга"
+            android:textColor="#2c3e50"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:lineSpacingExtra="2dp" />
+
+        <!-- Информация о родителе -->
+        <TextView
+            android:id="@+id/textParentName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Родитель: Имя родителя"
+            android:textColor="#34495e"
+            android:textSize="14sp"
+            android:layout_marginTop="8dp" />
+
+        <!-- Услуга -->
+        <TextView
+            android:id="@+id/textService"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Услуга: Детская стрижка"
+            android:textColor="#34495e"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp" />
+
+        <!-- Дата и время -->
+        <TextView
+            android:id="@+id/textDateTime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Когда: 15.05.2023 в 14:30"
+            android:textColor="#34495e"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp" />
+
+        <!-- Телефон -->
+        <TextView
+            android:id="@+id/textPhone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📞 +7 (950) 705-09-64"
+            android:textColor="#2c3e50"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_marginTop="12dp"
+            android:padding="8dp"
+            android:background="#f8f9fa"
+            android:drawablePadding="8dp" />
+
+        <!-- Примечания -->
+        <TextView
+            android:id="@+id/textNotes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Примечания: Особые пожелания клиента"
+            android:textColor="#7f8c8d"
+            android:textSize="13sp"
+            android:layout_marginTop="12dp"
+            android:padding="8dp"
+            android:background="#f8f9fa"
+            android:visibility="gone" />
+
+        <!-- Статус -->
+        <TextView
+            android:id="@+id/textStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Статус: Новая"
+            android:textColor="#27ae60"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp"
+            android:padding="8dp"
+            android:background="#ecf0f1"
+            android:gravity="center" />
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>
