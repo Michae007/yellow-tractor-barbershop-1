@@ -1,0 +1,46 @@
+name: SIMPLE APK BUILD
+
+on:
+  workflow_dispatch:
+
+jobs:
+  simple-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🔍 Show EXACT structure
+      run: |
+        echo "=== WHAT'S REALLY IN THE PROJECT? ==="
+        pwd
+        ls -la
+        echo "=== ANDROID-APP FOLDER ==="
+        ls -la android-app/ || echo "❌ NO ANDROID-APP FOLDER!"
+        echo "=== GRADLE FILES ANYWHERE ==="
+        find . -name "*.gradle" -type f 2>/dev/null || echo "❌ NO GRADLE FILES!"
+        echo "=== ANY APK FILES? ==="
+        find . -name "*.apk" -type f 2>/dev/null || echo "❌ NO APK FILES!"
+        
+    - name: 🛠️ Try basic Android setup
+      run: |
+        # Установим Android SDK вручную
+        yes | sdkmanager --licenses
+        sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0"
+        
+    - name: 🎯 ATTEMPT BUILD
+      run: |
+        echo "🚀 Попытка сборки..."
+        if [ -d "android-app" ]; then
+          cd android-app
+          ls -la
+          # Просто попробуем найти что-то для сборки
+          find . -name "build.gradle" -exec dirname {} \; | head -1 | while read dir; do
+            echo "📁 Найден проект в: $dir"
+            cd "$dir"
+            ./gradlew assembleDebug || gradle assembleDebug || echo "❌ Сборка не удалась"
+          done
+        else
+          echo "❌ Папка android-app не существует!"
+        fi
