@@ -11,36 +11,52 @@ jobs:
     - name: 📥 Checkout code
       uses: actions/checkout@v4
       
-    - name: 🔍 Show EXACT structure
+    - name: 🔍 Show Project Structure
       run: |
-        echo "=== WHAT'S REALLY IN THE PROJECT? ==="
-        pwd
+        echo "=== СТРУКТУРА ПРОЕКТА ==="
         ls -la
-        echo "=== ANDROID-APP FOLDER ==="
-        ls -la android-app/ || echo "❌ NO ANDROID-APP FOLDER!"
-        echo "=== GRADLE FILES ANYWHERE ==="
-        find . -name "*.gradle" -type f 2>/dev/null || echo "❌ NO GRADLE FILES!"
-        echo "=== ANY APK FILES? ==="
-        find . -name "*.apk" -type f 2>/dev/null || echo "❌ NO APK FILES!"
+        echo "=== СОДЕРЖИМОЕ ANDROID-APP ==="
+        ls -la android-app/ || echo "❌ Папка android-app не найдена!"
+        echo "=== GRADLE ФАЙЛЫ ==="
+        find . -name "*.gradle" -type f 2>/dev/null || echo "❌ Gradle файлы не найдены"
         
-    - name: 🛠️ Try basic Android setup
+    - name: ⚙️ Setup Android Environment
+      uses: android-actions/setup-android@v3
+      
+    - name: 🛠️ Build APK
       run: |
-        # Установим Android SDK вручную
-        yes | sdkmanager --licenses
-        sdkmanager "platform-tools" "platforms;android-33" "build-tools;33.0.0"
-        
-    - name: 🎯 ATTEMPT BUILD
-      run: |
-        echo "🚀 Попытка сборки..."
+        echo "🚀 Начинаем сборку APK..."
         if [ -d "android-app" ]; then
           cd android-app
+          echo "📁 Содержимое android-app:"
           ls -la
-          # Просто попробуем найти что-то для сборки
-          find . -name "build.gradle" -exec dirname {} \; | head -1 | while read dir; do
-            echo "📁 Найден проект в: $dir"
-            cd "$dir"
-            ./gradlew assembleDebug || gradle assembleDebug || echo "❌ Сборка не удалась"
-          done
+          
+          # Проверяем наличие gradlew
+          if [ -f "gradlew" ]; then
+            echo "🔧 Найден gradlew - запускаем сборку..."
+            chmod +x gradlew
+            ./gradlew assembleDebug
+          else
+            echo "🔧 Gradlew не найден, используем системный gradle..."
+            gradle assembleDebug
+          fi
         else
           echo "❌ Папка android-app не существует!"
+          echo "📂 Доступные папки:"
+          ls -la
         fi
+        
+    - name: 📦 Find and Upload APK
+      if: success()
+      run: |
+        echo "🔍 Ищем собранные APK файлы..."
+        find . -name "*.apk" -type f | head -10 || echo "APK файлы не найдены"
+        
+    - name: ⬆️ Upload APK Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-apk
+        path: |
+          **/build/outputs/apk/**/*.apk
+          **/app/build/outputs/apk/**/*.apk
+        retention-days: 7
