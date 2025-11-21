@@ -1,6 +1,6 @@
 // Конфигурация API
 // ЗАМЕНИТЕ ЭТОТ URL НА ВАШ URL ИЗ GOOGLE APPS SCRIPT
-const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/ВАШ_ID/exec';
+const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyoNz_TOgWcbpY-77fy1Urrd5-rkvAZ9DOWOKTFg65A-Zi_fdZ4Fo_sD3kcqtSPPWHFgQ/exec';
 
 // Базовые функции API
 class GASAPI {
