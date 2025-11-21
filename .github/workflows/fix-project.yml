@@ -1,0 +1,123 @@
+name: FIX ANDROID PROJECT
+
+on:
+  workflow_dispatch:
+
+jobs:
+  fix-and-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🔍 Analyze Project Structure
+      run: |
+        echo "=== АНАЛИЗ СТРУКТУРЫ ПРОЕКТА ==="
+        cd android-app
+        echo "1. Файлы в android-app:"
+        ls -la
+        echo ""
+        echo "2. Содержимое папки app:"
+        ls -la app/ || echo "❌ Папка app не найдена!"
+        echo ""
+        echo "3. Содержимое build.gradle:"
+        cat build.gradle || echo "❌ Файл build.gradle не найден!"
+        echo ""
+        echo "4. Содержимое app/build.gradle:"
+        cat app/build.gradle || echo "❌ Файл app/build.gradle не найден!"
+        
+    - name: 🛠️ Fix Project Structure
+      run: |
+        cd android-app
+        
+        # Проверяем и исправляем корневой build.gradle
+        if [ ! -f "build.gradle" ] || [ ! -s "build.gradle" ]; then
+          echo "🔧 Создаем корневой build.gradle..."
+          cat > build.gradle << 'EOF'
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "com.android.tools.build:gradle:7.4.2"
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+EOF
+        fi
+        
+        # Проверяем и исправляем app/build.gradle
+        if [ ! -f "app/build.gradle" ] || [ ! -s "app/build.gradle" ]; then
+          echo "🔧 Создаем app/build.gradle..."
+          mkdir -p app
+          cat > app/build.gradle << 'EOF'
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "com.example.myapp"
+        minSdk 21
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            debuggable true
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+}
+EOF
+        fi
+        
+        # Создаем gradle wrapper если его нет
+        if [ ! -f "gradlew" ]; then
+          echo "🔧 Инициализируем Gradle Wrapper..."
+          gradle wrapper --gradle-version=7.5
+        fi
+        
+    - name: 🏗️ Build Fixed Project
+      run: |
+        cd android-app
+        chmod +x ./gradlew
+        ./gradlew :app:assembleDebug --stacktrace
+        
+    - name: 📦 Find APK Files
+      run: |
+        echo "🔍 Ищем APK файлы..."
+        find . -name "*.apk" -type f | head -10 || echo "APK файлы не найдены"
+        
+    - name: ⬆️ Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: fixed-android-apk
+        path: android-app/app/build/outputs/apk/**/*.apk
+        retention-days: 7
