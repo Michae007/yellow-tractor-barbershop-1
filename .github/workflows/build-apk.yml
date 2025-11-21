@@ -3,9 +3,7 @@ name: Build Android APK
 on:
   push:
     branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
-  workflow_dispatch:  # Позволяет запускать вручную
+  workflow_dispatch:
 
 jobs:
   build:
@@ -24,27 +22,29 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
       
-    - name: Make gradlew executable
-      run: chmod +x ./android-app/gradlew
-      
-    - name: Build APK
+    - name: Check project structure
       run: |
-        cd android-app
-        ./gradlew assembleDebug
+        echo "Checking project structure..."
+        ls -la
+        echo "Android-app contents:"
+        ls -la android-app/ || echo "android-app directory not found"
         
+    - name: Build with direct Gradle
+      run: |
+        # Используем системный Gradle вместо gradlew
+        cd android-app
+        gradle assembleDebug --stacktrace
+        
+    - name: Find and upload APK
+      run: |
+        find . -name "*.apk" -type f | head -5
+      if: always()
+      
     - name: Upload APK artifact
       uses: actions/upload-artifact@v4
       with:
-        name: app-debug-apk
-        path: android-app/app/build/outputs/apk/debug/app-debug.apk
+        name: android-apk
+        path: |
+          android-app/app/build/outputs/apk/**/*.apk
+          **/app/build/outputs/apk/**/*.apk
         retention-days: 30
-        
-    - name: Create Release
-      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-      uses: softprops/action-gh-release@v1
-      with:
-        files: android-app/app/build/outputs/apk/debug/app-debug.apk
-        tag_name: v1.0.${{ github.run_number }}
-        name: Release v1.0.${{ github.run_number }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
