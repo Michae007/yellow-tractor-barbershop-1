@@ -678,3 +678,49 @@ section {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
+/* Новые стили для прайс-листа */
+.section-subtitle {
+    text-align: center;
+    font-size: 1.3rem;
+    color: var(--text-light);
+    margin-bottom: 3rem;
+    font-weight: 500;
+    font-family: 'Nunito', sans-serif;
+}
+
+/* Обновленные стили для карточек услуг */
+.service-description {
+    font-size: 0.95rem;
+    color: var(--text-light);
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+    min-height: 60px;
+}
+
+.service-price {
+    font-weight: 700;
+    font-size: 1.8rem;
+    color: var(--secondary);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.service-duration {
+    color: var(--text-light);
+    font-size: 0.9rem;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+/* Адаптация для мобильных */
+@media (max-width: 768px) {
+    .section-subtitle {
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .service-description {
+        min-height: auto;
+        font-size: 0.9rem;
+    }
+}
