@@ -240,7 +240,16 @@ section {
     transform: scale(1.02);
 }
 
-/* Услуги */
+/* Прайс-лист */
+.section-subtitle {
+    text-align: center;
+    font-size: 1.3rem;
+    color: var(--text-light);
+    margin-bottom: 3rem;
+    font-weight: 500;
+    font-family: 'Nunito', sans-serif;
+}
+
 .services-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -286,22 +295,27 @@ section {
     color: var(--text);
 }
 
-.service-card p {
-    margin-bottom: 1.5rem;
+.service-description {
+    font-size: 0.95rem;
     color: var(--text-light);
-    line-height: 1.6;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+    min-height: 60px;
 }
 
-.price {
+.service-price {
     font-weight: 700;
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     color: var(--secondary);
     display: block;
+    margin-bottom: 0.5rem;
 }
 
-.duration {
+.service-duration {
     color: var(--text-light);
     font-size: 0.9rem;
+    display: block;
+    margin-bottom: 1rem;
 }
 
 /* Запись */
@@ -677,39 +691,6 @@ section {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
-}
-/* Новые стили для прайс-листа */
-.section-subtitle {
-    text-align: center;
-    font-size: 1.3rem;
-    color: var(--text-light);
-    margin-bottom: 3rem;
-    font-weight: 500;
-    font-family: 'Nunito', sans-serif;
-}
-
-/* Обновленные стили для карточек услуг */
-.service-description {
-    font-size: 0.95rem;
-    color: var(--text-light);
-    line-height: 1.5;
-    margin-bottom: 1.5rem;
-    min-height: 60px;
-}
-
-.service-price {
-    font-weight: 700;
-    font-size: 1.8rem;
-    color: var(--secondary);
-    display: block;
-    margin-bottom: 0.5rem;
-}
-
-.service-duration {
-    color: var(--text-light);
-    font-size: 0.9rem;
-    display: block;
-    margin-bottom: 1rem;
 }
 
 /* Адаптация для мобильных */
