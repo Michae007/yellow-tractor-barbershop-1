@@ -3,7 +3,7 @@ name: Build Android APK
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:
+  workflow-dispatch:
 
 jobs:
   build:
@@ -24,19 +24,30 @@ jobs:
       
     - name: Debug project structure
       run: |
-        echo "=== Project Structure ==="
-        find . -name "*.gradle" -type f | head -10
-        echo "=== settings.gradle content ==="
-        cat android-app/settings.gradle || echo "settings.gradle not found"
+        echo "=== Full project structure ==="
+        find . -type f -name "*.gradle" -o -name "*.kts" | head -20
+        echo "=== android-app directory ==="
+        ls -la android-app/
+        echo "=== Subdirectories ==="
+        find android-app -type d -maxdepth 3 | head -20
+        echo "=== Build files ==="
+        find android-app -name "build.gradle" -o -name "build.gradle.kts" | head -10
         
-    - name: Build APK
+    - name: Check available Gradle tasks
       run: |
         cd android-app
-        gradle assembleDebug --no-daemon
+        gradle tasks --no-daemon | grep -i "assemble\|build\|android" | head -20 || echo "No relevant tasks found"
         
-    - name: Upload APK artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: android-app-apk
-        path: android-app/app/build/outputs/apk/**/*.apk
-        retention-days: 30
+    - name: Try different build commands
+      run: |
+        cd android-app
+        # Попробуем разные варианты сборки
+        echo "Attempt 1: Basic build"
+        gradle build --no-daemon || echo "Build failed"
+        
+        echo "Attempt 2: Find Android modules"
+        gradle projects --no-daemon | grep -i "android\|app" || echo "No Android projects found"
+        
+    - name: Search for APK files
+      run: |
+        find . -name "*.apk" -type f | head -5 || echo "No APK files found"
