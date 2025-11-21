@@ -1,0 +1,92 @@
+name: Build APK
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
+
+    - name: Debug project structure
+      run: |
+        echo "=== Project structure ==="
+        ls -la
+        echo "=== android-app structure ==="
+        ls -la android-app/
+        echo "=== app structure ==="
+        ls -la android-app/app/ || echo "No app directory"
+
+    - name: Create missing Gradle files
+      run: |
+        cd android-app
+
+        # Create app/build.gradle if it doesn't exist
+        if [ ! -f "app/build.gradle" ]; then
+          echo "Creating app/build.gradle"
+          mkdir -p app
+          cat > app/build.gradle << 'EOF'
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "com.example.app"
+        minSdk 21
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            debuggable true
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.8.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+}
+EOF
+        fi
+
+        # Create gradle wrapper if it doesn't exist
+        if [ ! -f "gradlew" ]; then
+          echo "Creating Gradle Wrapper"
+          gradle wrapper --gradle-version=7.5
+        fi
+
+    - name: Build APK
+      run: |
+        cd android-app
+        chmod +x gradlew
+        ./gradlew :app:assembleDebug
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-debug-apk
+        path: android-app/app/build/outputs/apk/debug/app-debug.apk
+        retention-days: 7
