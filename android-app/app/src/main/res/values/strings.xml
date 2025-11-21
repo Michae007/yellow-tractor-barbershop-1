@@ -1,0 +1,5 @@
+<resources>
+    <color name="yellow_tractor_primary">#FFC107</color>
+    <color name="yellow_tractor_primary_dark">#FFA000</color>
+    <color name="yellow_tractor_accent">#4CAF50</color>
+</resources>
