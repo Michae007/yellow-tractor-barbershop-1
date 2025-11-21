@@ -68,9 +68,9 @@ function renderServices(services) {
         <div class="service-card">
             <div class="service-icon">${getServiceIcon(service.Услуга)}</div>
             <h3>${service.Услуга}</h3>
-            <p>${service.Описание}</p>
-            <span class="price">${service.Цена} руб.</span>
-            <span class="duration">${service.Длительность} мин.</span>
+            <p class="service-description">${service.Описание}</p>
+            <span class="service-price">${service.Цена} ₽</span>
+            <span class="service-duration">${service.Длительность} мин.</span>
         </div>
     `).join('');
 }
@@ -97,10 +97,10 @@ function populateServiceSelect(services) {
 // Иконки для услуг
 function getServiceIcon(serviceName) {
     const icons = {
-        'Детская стрижка': '✂️',
-        'Стрижка с укладкой': '👧',
-        'Первая стрижка': '👶',
-        'Креативное окрашивание': '🎨'
+        'Под насадку(и)': '🚀',
+        'Ножницы + машинка': '✂️',
+        'Ножницы, ручная работа': '🌟',
+        'Стрижка с фигурным выстригом': '🎨'
     };
     
     return icons[serviceName] || '💇';
