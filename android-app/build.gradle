@@ -3,6 +3,7 @@ plugins {
 }
 
 android {
+    namespace 'com.yellowtractor.barbershop'
     compileSdk 33
 
     defaultConfig {
