@@ -1,4 +1,4 @@
-name: Build Android APK
+name: Build Android APK Simple
 
 on:
   push:
@@ -19,32 +19,18 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         
-    - name: Setup Android SDK
+    - name: Setup Android SDK and Gradle
       uses: android-actions/setup-android@v3
       
-    - name: Check project structure
+    - name: Build with system Gradle
       run: |
-        echo "Checking project structure..."
-        ls -la
-        echo "Android-app contents:"
-        ls -la android-app/ || echo "android-app directory not found"
-        
-    - name: Build with direct Gradle
-      run: |
-        # Используем системный Gradle вместо gradlew
         cd android-app
-        gradle assembleDebug --stacktrace
+        # Используем системный Gradle вместо gradlew
+        gradle assembleDebug
         
-    - name: Find and upload APK
-      run: |
-        find . -name "*.apk" -type f | head -5
-      if: always()
-      
-    - name: Upload APK artifact
+    - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: android-apk
-        path: |
-          android-app/app/build/outputs/apk/**/*.apk
-          **/app/build/outputs/apk/**/*.apk
+        name: app-apk
+        path: android-app/app/build/outputs/apk/debug/app-debug.apk
         retention-days: 30
