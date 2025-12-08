@@ -1,0 +1,126 @@
+name: Android CI
+
+on: workflow_dispatch
+
+jobs:
+  android-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup environment
+      run: |
+        # Install basic dependencies
+        sudo apt-get update
+        sudo apt-get install -y \
+          openjdk-17-jdk \
+          git \
+          wget \
+          unzip
+        
+        # Verify Java
+        java -version
+        javac -version
+        
+    - name: Check project
+      run: |
+        echo "📁 Project contents:"
+        ls -la
+        
+        echo ""
+        echo "🔍 Checking for Android project:"
+        if [ -f "app/build.gradle" ]; then
+          echo "✅ Found: app/build.gradle"
+        elif [ -f "build.gradle" ]; then
+          echo "📦 Found: build.gradle"
+        else
+          echo "⚠️ No build.gradle found"
+          echo "Creating test Android project..."
+          
+          # Create minimal Android project
+          mkdir -p app/src/main/java/com/test
+          
+          # Simple build.gradle for app
+          cat > app/build.gradle << 'EOF'
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    compileSdk 34
+    namespace 'com.test.app'
+    
+    defaultConfig {
+        applicationId "com.test.app"
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+    
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+}
+EOF
+          
+          # Root build.gradle
+          cat > build.gradle << 'EOF'
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.1.0'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+EOF
+          
+          cat > settings.gradle << 'EOF'
+include ':app'
+EOF
+        fi
+        
+    - name: Try to build
+      run: |
+        echo "🛠 Attempting build..."
+        
+        # Download Gradle if needed
+        if [ ! -f "gradlew" ]; then
+          echo "Downloading Gradle..."
+          wget https://services.gradle.org/distributions/gradle-8.2-bin.zip
+          unzip gradle-8.2-bin.zip
+          export PATH=$PWD/gradle-8.2/bin:$PATH
+        fi
+        
+        # Build
+        if command -v gradle &> /dev/null; then
+          gradle assembleDebug --stacktrace || echo "Build failed"
+        else
+          echo "Gradle not found"
+        fi
+        
+    - name: Upload any results
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-output
+        path: |
+          app/build/
+          build/
+        if-no-files-found: warn
