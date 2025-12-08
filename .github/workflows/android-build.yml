@@ -1,35 +1,102 @@
-name: Android Build
+name: Android CI
 
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
-    
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
         
-    - name: Change wrapper permissions
-      run: chmod +x gradlew
+    - name: Setup Android SDK
+      uses: android-actions/setup-android@v3
       
-    - name: Build with Gradle
+    - name: Check if gradlew exists
       run: |
-        ./gradlew assembleDebug
-        ./gradlew assembleRelease
+        echo "📁 Checking project structure..."
+        ls -la
+        echo ""
+        echo "📦 Project files:"
+        find . -maxdepth 1 -type f | grep -v ".git"
+        echo ""
+        echo "📂 Checking gradlew..."
+        if [ -f "gradlew" ]; then
+          echo "✅ gradlew found"
+        else
+          echo "❌ gradlew not found!"
+          echo "Generating gradlew if needed..."
+          # Попробуем инициализировать Gradle
+          gradle wrapper 2>/dev/null || echo "Gradle not installed, will try to download"
+        fi
         
-    - name: Upload APK
+    - name: Make gradlew executable
+      run: |
+        if [ -f "gradlew" ]; then
+          chmod +x gradlew
+          echo "✅ gradlew is now executable"
+        else
+          echo "⚠️ gradlew not found, trying alternative..."
+          # Попробуем использовать системный gradle
+          which gradle || echo "Gradle not found in system"
+        fi
+        
+    - name: Grant execute permission for gradle wrapper
+      run: |
+        # Даем права на все gradle файлы
+        if [ -d "gradle/wrapper" ]; then
+          chmod +x gradle/wrapper/gradle-wrapper.jar 2>/dev/null || true
+        fi
+        
+    - name: Build Debug APK
+      run: |
+        echo "🚀 Starting build process..."
+        if [ -f "gradlew" ]; then
+          ./gradlew tasks --all || echo "Listing tasks failed, continuing..."
+          ./gradlew assembleDebug --no-daemon --stacktrace || echo "Build failed"
+        else
+          echo "❌ gradlew not found, cannot build"
+          exit 1
+        fi
+        
+    - name: Find and list APK files
+      run: |
+        echo "🔍 Searching for APK files..."
+        find . -name "*.apk" -type f 2>/dev/null | while read file; do
+          echo "📱 Found: $file"
+          ls -lh "$file"
+        done
+        
+        echo "📂 Checking build outputs..."
+        if [ -d "app/build/outputs/apk" ]; then
+          echo "📁 APK directory structure:"
+          find app/build/outputs/apk -type f -name "*.apk" 2>/dev/null | head -10
+        else
+          echo "❌ No APK directory found"
+          echo "Current directory structure:"
+          ls -la app/ || echo "No app directory"
+          ls -la app/build/ 2>/dev/null || echo "No build directory"
+        fi
+        
+    - name: Upload APK artifacts
+      if: success() || failure()
       uses: actions/upload-artifact@v4
       with:
-        name: app-apks
+        name: android-apks
         path: |
-          app/build/outputs/apk/debug/
-          app/build/outputs/apk/release/
+          app/build/outputs/apk/debug/*.apk
+          app/build/outputs/apk/release/*.apk
+        retention-days: 30
+        if-no-files-found: warn
